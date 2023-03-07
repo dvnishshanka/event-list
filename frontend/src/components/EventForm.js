@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 
 import classes from "./EventForm.module.css";
+import { getAuthToken } from "./../util/auth";
 
 function EventForm({ method, event = {} }) {
   const navigate = useNavigate();
@@ -84,6 +85,7 @@ export default EventForm;
 
 export const action = async ({ request, params }) => {
   const data = await request.formData();
+  const token = getAuthToken();
 
   const newEvent = {
     title: data.get("title"),
@@ -93,13 +95,16 @@ export const action = async ({ request, params }) => {
   };
 
   let url = "http://localhost:8080/events";
-  if (request.method === "patch") {
+  if (request.method === "PATCH") {
     url = "http://localhost:8080/events/" + params.id;
   }
 
   const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: request.method.toUpperCase(),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
     body: JSON.stringify(newEvent),
   });
 
